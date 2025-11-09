@@ -3,11 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>英單練習｜選擇題／填空題</title>
+  <title>英單練習｜選擇題／填空題（CSV 四欄）</title>
   <style>
-    :root{
-      --bg:#0b1020; --card:#12182b; --muted:#9aa4bf; --text:#e6ecff; --accent:#5dd6ff; --ok:#3ddc97; --warn:#ffd166; --bad:#ff6b6b;
-    }
+    :root{ --bg:#0b1020; --card:#12182b; --muted:#9aa4bf; --text:#e6ecff; --accent:#5dd6ff; --ok:#3ddc97; --warn:#ffd166; --bad:#ff6b6b; }
     *{box-sizing:border-box}
     body{margin:0;background:linear-gradient(180deg,#0a0f1f 0%,#0c1328 100%);color:var(--text);font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Noto Sans TC, PingFang TC, Helvetica, Arial}
     header{padding:18px 16px;border-bottom:1px solid #1b2440;position:sticky;top:0;background:rgba(9,14,28,.85);backdrop-filter: blur(10px);z-index:10}
@@ -46,6 +44,8 @@
     .hint{font-size:12px;color:#a9b6e6;margin-top:6px}
     .footer{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap}
     .link{color:#7ec8ff}
+    .diag{font-size:12px;color:#c7d3ff;background:#0d1630;border:1px solid #223063;border-radius:10px;padding:8px;margin-top:8px}
+    .chip{display:inline-block;background:#0d1630;border:1px solid #223063;border-radius:999px;padding:2px 8px;margin-right:6px}
   </style>
 </head>
 <body>
@@ -57,19 +57,20 @@
   <section class="card">
     <div class="grid controls">
       <div>
-        <label>題庫來源（Google 試算表）</label>
-        <input id="sheetUrl" placeholder="貼上已公開的 CSV 連結（檔案→共用→發布到網路，選 CSV）" />
+        <label>題庫來源（CSV，四欄：序號／英文／詞性／中文）</label>
+        <input id="sheetUrl" placeholder="貼上 Google 試算表『發布到網路→CSV』連結，或使用預設題庫" />
         <div class="row" style="margin-top:8px">
           <button id="btnLoad" class="primary">載入題庫</button>
           <button id="btnLoadDefault" class="ghost">用預設題庫</button>
           <button id="btnUseSample" class="ghost">使用範例題庫</button>
         </div>
-        <div class="hint">格式：三欄 <b>中文</b>、<b>英文</b>、<b>詞性</b>。<br>可在原始碼上方設定「預設題庫 URL」，開啟網頁就會自動讀取；也能隨時貼上新連結覆蓋。</div>
+        <div class="hint">本頁<strong>固定支援 CSV 四欄</strong>：序號、英文、詞性、中文。<br>若條目無中文（例如人名），會自動避開填空題，但仍可用於選擇題。</div>
+        <div id="diagBox" class="diag hide"></div>
       </div>
       <div>
-        <label>出題範圍（索引）</label>
+        <label>出題範圍（索引；以題庫列號為準）</label>
         <input id="range" placeholder="例如：1-100 或 1-50, 120, 150-180"/>
-        <div class="hint">以題庫列號為基準（1 表第一列資料）。會自動忽略超出範圍的索引。</div>
+        <div class="hint">會自動忽略超出範圍的索引。</div>
       </div>
       <div>
         <label>題目數量</label>
@@ -86,17 +87,17 @@
       <div>
         <label>題目顯示</label>
         <select id="display">
-          <option value="en-pos">顯示：英文＋詞性（適合中文作答）</option>
-          <option value="zh-pos">顯示：中文＋詞性（適合英文作答）</option>
+          <option value="zh-pos">顯示：中文＋詞性</option>
+          <option value="en-pos">顯示：英文＋詞性</option>
           <option value="auto">自動（依模式調整）</option>
         </select>
-        <div class="hint">選擇題建議顯示 <b>中文＋詞性</b>；填空題一律 <b>中文＋詞性</b>。</div>
+        <div class="hint">選擇題建議顯示中文＋詞性；填空題一律中文＋詞性。</div>
       </div>
       <div>
         <label>其他</label>
         <div class="row">
           <label class="pill" style="gap:8px"><input type="checkbox" id="allowTTS"> 啟用英語發音（TTS）</label>
-          <label class="pill" style="gap:8px"><input type="checkbox" id="caseIns"> 英文不分大小寫</label>
+          <label class="pill" style="gap:8px"><input type="checkbox" id="caseIns" checked> 英文不分大小寫</label>
         </div>
       </div>
     </div>
@@ -166,8 +167,8 @@
   <section class="card">
     <h3 style="margin:0 0 6px">使用說明</h3>
     <ol class="small">
-      <li>在 Google 試算表：檔案 → 共用 → <b>發布到網路</b>，選擇 CSV；或在分享連結後把網址加上 <code>?gviz=1</code> 使用 JSON。</li>
-      <li>貼到「題庫來源」欄並按「載入題庫」。系統會讀取三欄：中文、英文、詞性。</li>
+      <li>在 Google 試算表：檔案 → 共用 → <b>發布到網路</b> → CSV（四欄：序號、英文、詞性、中文）。</li>
+      <li>貼到「題庫來源」欄或直接用預設題庫。系統只要求「英文」必填；填空題會自動避開沒有中文的條目。</li>
       <li>設定出題範圍與題數，選擇模式後開始。</li>
       <li>作答完畢才會顯示分數與錯題。本機瀏覽器會保存最近十次紀錄。</li>
     </ol>
@@ -176,147 +177,116 @@
 </main>
 
 <script>
-// ←← 在這裡設定你的預設題庫網址（CSV 或 gviz JSON）
-// 例如：
-// const DEFAULT_DATA_URL = "https://docs.google.com/spreadsheets/d/1Al0fXedODCSlb_CuVGoKlf78ioj3NREHpYoE8XJHqig/gviz/tq?tqx=out:json&gid=0";
-// 如果留空字串，就不會自動載入預設題庫。
-const DEFAULT_DATA_URL = "https://docs.google.com/spreadsheets/d/1Al0fXedODCSlb_CuVGoKlf78ioj3NREHpYoE8XJHqig/gviz/tq?tqx=out:json&gid=0";
+// 預設題庫：你的 Google 試算表「發布為 CSV」連結（gid=0）。
+const DEFAULT_DATA_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSKoU6W5HiPC0_VB2fP0rf8g8EZGaATG19PGCTfeTSGA6bhI7zTjuDYnupIDn616spq0p43T6Z0cVdd/pub?gid=0&single=true&output=csv";
 
-// ====== 資料與工具 ======
+// ====== 小工具 ======
 const $ = (sel)=>document.querySelector(sel);
 const $$ = (sel)=>Array.from(document.querySelectorAll(sel));
-const state = {
-  raw: [], // {zh,en,pos}
-  pool: [], // 出題池（索引）
-  quiz: [], // 題目 objects
-  i: 0,
-  right: 0,
-  wrongItems: [], // {q, your, ans}
-  currentQ: null,
-  lastWrongPool: [], // 儲存前次錯題的索引
-};
-
 const HISTORY_KEY = 'vocab-quiz-history-v1';
 const DATA_CACHE_KEY = 'vocab-quiz-data-url-v1';
 
-function saveHistory(rec){
-  const list = loadHistory();
-  list.unshift(rec);
-  while(list.length>10) list.pop();
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
-  renderHistory();
-}
-function loadHistory(){
-  try{return JSON.parse(localStorage.getItem(HISTORY_KEY))||[]}catch{ return [] }
-}
-function renderHistory(){
-  const box = $('#history');
-  const list = loadHistory();
-  box.innerHTML = list.length ? '' : '<div class="muted small">尚無紀錄</div>';
-  list.forEach(r=>{
-    const div = document.createElement('div');
-    div.className = 'wrong-item';
-    div.innerHTML = `<div class="row"><b>${r.score}%</b> <span class="muted small">｜${r.mode}｜範圍：${escapeHtml(r.range)}</span><span class="right small">${new Date(r.time).toLocaleString()}</span></div>`;
-    box.appendChild(div);
-  });
-}
-$('#btnClearHistory').onclick = ()=>{ localStorage.removeItem(HISTORY_KEY); renderHistory(); };
+const state = {
+  raw: [], // {en,pos,zh}
+  pool: [], quiz: [], i:0, right:0,
+  wrongItems: [], currentQ:null, lastWrongPool: [],
+};
 
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
+function escapeHtml(s){return String(s).replace(/[&<>\"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function saveHistory(rec){ const list = loadHistory(); list.unshift(rec); while(list.length>10) list.pop(); localStorage.setItem(HISTORY_KEY, JSON.stringify(list)); renderHistory(); }
+function loadHistory(){ try{return JSON.parse(localStorage.getItem(HISTORY_KEY))||[]}catch{ return [] } }
+function renderHistory(){ const box=$('#history'); const list=loadHistory(); box.innerHTML = list.length? '' : '<div class="muted small">尚無紀錄</div>'; list.forEach(r=>{ const div=document.createElement('div'); div.className='wrong-item'; div.innerHTML = `<div class="row"><b>${r.score}%</b> <span class="muted small">｜${r.mode}｜範圍：${escapeHtml(r.range)}</span><span class="right small">${new Date(r.time).toLocaleString()}</span></div>`; box.appendChild(div); }); }
+$('#btnClearHistory').onclick = ()=>{ localStorage.removeItem(HISTORY_KEY); renderHistory(); };
 
 // ====== 題庫載入 ======
 const datasetStatus = $('#datasetStatus');
 const sheetUrlInput = $('#sheetUrl');
+const diagBox = $('#diagBox');
 
 $('#btnUseSample').onclick = ()=>{ loadSample(); };
-$('#btnLoadDefault').onclick = async ()=>{
-  if(!DEFAULT_DATA_URL){ alert('尚未在程式碼中設定 DEFAULT_DATA_URL。'); return; }
-  sheetUrlInput.value = DEFAULT_DATA_URL;
-  localStorage.removeItem(DATA_CACHE_KEY); // 強制以預設為主
-  $('#btnLoad').click();
-};
-$('#btnLoad').onclick = async ()=>{
-  const url = sheetUrlInput.value.trim();
-  if(!url){ alert('請先貼上 Google 試算表公開連結（CSV 或 ?gviz=1 JSON）'); return }
+$('#btnLoadDefault').onclick = async ()=>{ if(!DEFAULT_DATA_URL){ alert('尚未設定 DEFAULT_DATA_URL'); return; } sheetUrlInput.value = DEFAULT_DATA_URL; localStorage.removeItem(DATA_CACHE_KEY); $('#btnLoad').click(); };
+$('#btnLoad').onclick = async ()=>{ const url = sheetUrlInput.value.trim(); if(!url){ alert('請先貼上 CSV 連結'); return } await loadCsv(url, {cache:true}); };
+
+async function loadCsv(url, {cache=false}={}){
   datasetStatus.innerHTML = '題庫：<span class="muted">讀取中…</span>';
+  diag('');
   try{
-    let data;
-    if(url.includes('gviz=1')){
-      data = await fetchGvizJson(url);
-    }else{
-      data = await fetchCsv(url);
-    }
+    const data = await fetchCsv(url);
     state.raw = data;
-    localStorage.setItem(DATA_CACHE_KEY, url);
+    if(cache) localStorage.setItem(DATA_CACHE_KEY, url);
     datasetStatus.innerHTML = `題庫：<b>${state.raw.length}</b> 筆`;
+    showDiagPreview(state.raw);
   }catch(e){
     console.error(e);
     datasetStatus.innerHTML = '題庫：<span class="muted">讀取失敗</span>';
+    diag(`<span class="chip">診斷</span> ${escapeHtml(e.message)}\n‣ 請確認連結為「發布到網路 → CSV」且可公開讀取。`);
     alert('讀取失敗：'+ e.message);
   }
-};
-
-async function fetchCsv(url){
-  const res = await fetch(url);
-  if(!res.ok) throw new Error('CSV 載入失敗');
-  const text = await res.text();
-  const rows = text.split(/\r?\n/).map(r=>r.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(s=>s.replace(/^\"|\"$/g,'').trim())).filter(r=>r.filter(Boolean).length>=2);
-  // 期待：中文, 英文, 詞性
-  return rows.map(r=>({ zh:r[0]||'', en:r[1]||'', pos:r[2]||'' })).filter(x=>x.zh && x.en);
 }
-async function fetchGvizJson(url){
-  const res = await fetch(url);
-  if(!res.ok) throw new Error('JSON 載入失敗');
+
+// 解析：固定吃四欄表頭（序號/英文/詞性/中文）。只要求英文必填。
+async function fetchCsv(url){
+  const res = await fetch(url, {cache:'no-store'});
+  if(!res.ok) throw new Error('CSV 載入失敗（HTTP '+res.status+'）');
   const text = await res.text();
-  const json = JSON.parse(text.replace(/^.*google\.visualization\.Query\.setResponse\(/,'').replace(/\);?\s*$/,''));
-  const table = json.table; // columns: assume zh,en,pos
-  const rows = table.rows.map(r=>r.c.map(c=>c?String(c.v):''));
-  return rows.map(r=>({ zh:r[0]||'', en:r[1]||'', pos:r[2]||'' })).filter(x=>x.zh && x.en);
+
+  // CSV split（處理引號包住逗號）
+  const rows = text.split(/\r?\n/)
+    .map(r => r.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(s => s.replace(/^"|"$/g,'').trim()))
+    .filter(r => r.length && r.some(x => x !== ''));
+
+  if(rows.length < 2) throw new Error('CSV 沒有資料列（可能只發佈了表頭或連結錯誤）');
+
+  // 表頭定位
+  const header = rows[0].map(h => h.replace(/\s+/g,'').toLowerCase());
+  const find = kw => header.findIndex(h => h.includes(kw));
+  const iEn  = find('英文');
+  const iPos = find('詞性');
+  const iZh  = find('中文');
+  if(iEn < 0) throw new Error('找不到「英文」欄位（請確認表頭：序號/英文/詞性/中文）');
+
+  const dataRows = rows.slice(1);
+  const data = dataRows.map(r => ({ en: r[iEn] || '', pos: (iPos>=0? r[iPos] : '') || '', zh: (iZh>=0? r[iZh] : '') || '' }))
+                       .filter(x => x.en);
+  if(!data.length) throw new Error('成功讀到 CSV，但所有資料的「英文」欄為空，或被解析器過濾。');
+  return data;
+}
+
+function diag(html){ if(!html){ diagBox.classList.add('hide'); diagBox.innerHTML=''; } else { diagBox.classList.remove('hide'); diagBox.innerHTML = html.replace(/\n/g,'<br>'); } }
+function showDiagPreview(list){
+  const head = `<span class="chip">載入成功</span> 共 ${list.length} 筆`;
+  const prev = list.slice(0,3).map((x,i)=>`#${i+1} en=<b>${escapeHtml(x.en)}</b> · pos=${escapeHtml(x.pos||'')} · zh=${escapeHtml(x.zh||'(無)')}`).join('<br>');
+  diag(head + '<br>' + prev);
 }
 
 function loadSample(){
   state.raw = [
-    {zh:'蘋果', en:'apple', pos:'n.'},
-    {zh:'香蕉', en:'banana', pos:'n.'},
-    {zh:'喜歡', en:'like', pos:'v.'},
-    {zh:'學校', en:'school', pos:'n.'},
-    {zh:'快速的', en:'fast', pos:'adj.'},
-    {zh:'跑步', en:'run', pos:'v.'},
-    {zh:'老師', en:'teacher', pos:'n.'},
-    {zh:'學生', en:'student', pos:'n.'},
-    {zh:'書本', en:'book', pos:'n.'},
-    {zh:'鉛筆', en:'pencil', pos:'n.'},
+    {en:'apple', pos:'n.', zh:'蘋果'},
+    {en:'banana', pos:'n.', zh:'香蕉'},
+    {en:'like', pos:'v.', zh:'喜歡'},
+    {en:'school', pos:'n.', zh:'學校'},
+    {en:'fast', pos:'adj.', zh:'快速的'},
+    {en:'run', pos:'v.', zh:'跑步'},
   ];
   datasetStatus.innerHTML = `題庫：<b>${state.raw.length}</b> 筆（範例）`;
+  showDiagPreview(state.raw);
 }
 
-// 啟動時，若有快取 URL，或預設題庫，就嘗試讀取
+// 啟動：先讀快取 URL；否則用預設題庫
 (async function initLoad(){
   renderHistory();
   const cached = localStorage.getItem(DATA_CACHE_KEY);
   try{
-    if(cached){
-      sheetUrlInput.value = cached;
-      if(cached.includes('gviz=1') || cached.includes('tqx=out:json')) state.raw = await fetchGvizJson(cached); else state.raw = await fetchCsv(cached);
-      datasetStatus.innerHTML = `題庫：<b>${state.raw.length}</b> 筆（上次使用）`;
-    } else if (DEFAULT_DATA_URL){
-      sheetUrlInput.value = DEFAULT_DATA_URL;
-      if(DEFAULT_DATA_URL.includes('gviz=1') || DEFAULT_DATA_URL.includes('tqx=out:json')) state.raw = await fetchGvizJson(DEFAULT_DATA_URL); else state.raw = await fetchCsv(DEFAULT_DATA_URL);
-      localStorage.setItem(DATA_CACHE_KEY, DEFAULT_DATA_URL);
-      datasetStatus.innerHTML = `題庫：<b>${state.raw.length}</b> 筆（預設）`;
-    }
-  }catch(e){
-    console.error(e);
-    datasetStatus.innerHTML = '題庫：<span class="muted">自動載入失敗，請手動貼上或改用範例</span>';
-  }
+    if(cached){ sheetUrlInput.value = cached; await loadCsv(cached); datasetStatus.innerHTML += '（上次使用）'; }
+    else if(DEFAULT_DATA_URL){ sheetUrlInput.value = DEFAULT_DATA_URL; await loadCsv(DEFAULT_DATA_URL, {cache:true}); datasetStatus.innerHTML += '（預設）'; }
+  }catch(e){ console.error(e); datasetStatus.innerHTML = '題庫：<span class="muted">自動載入失敗，請手動貼上或用範例</span>'; }
 })();
 
 // ====== 出題 ======
 $('#btnStart').onclick = startQuiz;
-$('#btnWrongPractice').onclick = ()=>{
-  if(!state.lastWrongPool.length){ alert('尚無可用錯題。'); return }
-  startQuiz({ useWrongPool:true });
-};
+$('#btnWrongPractice').onclick = ()=>{ if(!state.lastWrongPool.length){ alert('尚無可用錯題。'); return } startQuiz({ useWrongPool:true }); };
 
 function parseRange(str, max){
   if(!str) return Array.from({length:max},(_,i)=>i);
@@ -324,25 +294,13 @@ function parseRange(str, max){
   const idx = new Set();
   for(const p of parts){
     const m = p.match(/^(\d+)\s*[-~到]\s*(\d+)$/);
-    if(m){
-      let a = +m[1]-1, b = +m[2]-1; if(a>b) [a,b]=[b,a];
-      for(let i=a;i<=b && i<max;i++) idx.add(i);
-    }else if(/^\d+$/.test(p)){
-      const i = +p - 1; if(i>=0 && i<max) idx.add(i);
-    }
+    if(m){ let a=+m[1]-1, b=+m[2]-1; if(a>b) [a,b]=[b,a]; for(let i=a;i<=b && i<max;i++) idx.add(i); }
+    else if(/^\d+$/.test(p)){ const i=+p-1; if(i>=0 && i<max) idx.add(i); }
   }
   return [...idx].sort((a,b)=>a-b);
 }
 
-function pickUnique(arr,n){
-  const pool = arr.slice();
-  const out=[];
-  while(out.length<n && pool.length){
-    const i = Math.floor(Math.random()*pool.length);
-    out.push(pool.splice(i,1)[0]);
-  }
-  return out;
-}
+function pickUnique(arr,n){ const pool=arr.slice(); const out=[]; while(out.length<n && pool.length){ const i=Math.floor(Math.random()*(pool.length)); out.push(pool.splice(i,1)[0]); } return out; }
 
 function startQuiz(opts={}){
   if(!state.raw.length){ alert('請先載入題庫'); return }
@@ -350,11 +308,11 @@ function startQuiz(opts={}){
   const poolIdx = opts.useWrongPool ? state.lastWrongPool.slice() : parseRange(rangeStr, state.raw.length);
   const count = Math.max(1, Math.min(+$('#count').value||10, poolIdx.length));
   const modeSel = $('#mode').value; // choice / fill / mixed
-  const displaySel = $('#display').value; // en-pos / zh-pos / auto
+  const displaySel = $('#display').value; // zh-pos / en-pos / auto
 
   state.pool = pickUnique(poolIdx, count);
   state.quiz = state.pool.map(i=>({ ...state.raw[i], idx:i }));
-  state.i = 0; state.right = 0; state.wrongItems = []; state.currentQ = null;
+  state.i=0; state.right=0; state.wrongItems=[]; state.currentQ=null;
 
   $('#qTotal').textContent = state.quiz.length;
   $('#resultCard').classList.add('hide');
@@ -370,19 +328,21 @@ function startQuiz(opts={}){
 function buildQuestion(q, prefMode, displaySel){
   let mode = prefMode;
   if(mode==='mixed') mode = Math.random()<0.5 ? 'choice' : 'fill';
+  // 沒有中文，就不要出填空題
+  if(mode==='fill' && !q.zh) mode = 'choice';
 
   // 題目呈現
-  let stem = '', pos = q.pos||'';
-  let display = displaySel;
-  if(display==='auto') display = (mode==='choice') ? 'zh-pos' : 'zh-pos'; // 對小朋友更直觀
+  let stem = '', pos = q.pos||''; let display = displaySel;
+  if(display==='auto') display = (mode==='choice') ? 'zh-pos' : 'zh-pos';
   if(display==='en-pos'){ stem = q.en; }
-  if(display==='zh-pos'){ stem = q.zh; }
+  if(display==='zh-pos'){ stem = q.zh || q.en; }
 
   // 選項
   let options = null, answer = q.en;
   if(mode==='choice'){
-    const others = state.raw.filter(x=>x.en!==q.en && (x.pos||'')===(q.pos||''));
-    const distractors = pickUnique(others.length?others:state.raw, 3).map(x=>x.en);
+    const samePos = state.raw.filter(x=>x.en!==q.en && (x.pos||'')===(q.pos||''));
+    const base = samePos.length? samePos : state.raw.filter(x=>x.en!==q.en);
+    const distractors = pickUnique(base, 3).map(x=>x.en);
     options = shuffle([q.en, ...distractors]);
   }
 
@@ -390,14 +350,10 @@ function buildQuestion(q, prefMode, displaySel){
 }
 
 function nextQuestion(ctx){
-  if(state.i >= state.quiz.length){
-    return finishQuiz();
-  }
+  if(state.i >= state.quiz.length) return finishQuiz();
   const q = state.quiz[state.i];
-  const prefMode = $('#mode').value;
-  const displaySel = ctx?.displaySel || $('#display').value;
-  const meta = buildQuestion(q, prefMode, displaySel);
-  state.currentQ = { ...q, ...meta };
+  const prefMode = $('#mode').value; const displaySel = ctx?.displaySel || $('#display').value;
+  const meta = buildQuestion(q, prefMode, displaySel); state.currentQ = { ...q, ...meta };
 
   $('#qIndex').textContent = state.i+1;
   $('#progBar').style.width = ((state.i/state.quiz.length)*100).toFixed(1)+'%';
@@ -405,10 +361,8 @@ function nextQuestion(ctx){
   $('#qPos').textContent = meta.pos?`詞性：${meta.pos}`:'';
   $('#hintText').textContent = '';
 
-  // TTS 控制
   $('#btnSpeak').disabled = !( $('#allowTTS').checked && meta.answer );
 
-  // 顯示對應 UI
   if(meta.mode==='choice'){
     $('#fillBox').classList.add('hide');
     $('#choiceBox').classList.remove('hide');
@@ -422,8 +376,7 @@ function nextQuestion(ctx){
 }
 
 function renderChoices(meta){
-  const box = $('#choiceBox');
-  box.innerHTML='';
+  const box = $('#choiceBox'); box.innerHTML='';
   meta.options.forEach((opt,idx)=>{
     const btn = document.createElement('button');
     btn.className='choice';
@@ -433,120 +386,41 @@ function renderChoices(meta){
   });
 }
 
-function choose(opt){
-  const {answer} = state.currentQ;
-  const correct = sameWord(opt, answer);
-  markChoice(opt, correct);
-  recordAnswer(correct, opt);
-}
-
-function markChoice(opt, correct){
-  $$('#choiceBox .choice').forEach(btn=>{
-    const text = btn.textContent.replace(/^\d\s*/, '').trim();
-    if(sameWord(text, state.currentQ.answer)) btn.classList.add('correct');
-    if(sameWord(text, opt) && !correct) btn.classList.add('wrong');
-    btn.disabled = true;
-  });
-}
-
-function sameWord(a,b){
-  if($('#caseIns').checked) return a.trim().toLowerCase() === b.trim().toLowerCase();
-  return a.trim()===b.trim();
-}
+function sameWord(a,b){ return $('#caseIns').checked ? a.trim().toLowerCase()===b.trim().toLowerCase() : a.trim()===b.trim(); }
+function choose(opt){ const {answer}=state.currentQ; const correct = sameWord(opt, answer); markChoice(opt, correct); recordAnswer(correct, opt); }
+function markChoice(opt, correct){ $$('#choiceBox .choice').forEach(btn=>{ const text = btn.textContent.replace(/^\d\s*/, '').trim(); if(sameWord(text, state.currentQ.answer)) btn.classList.add('correct'); if(sameWord(text, opt) && !correct) btn.classList.add('wrong'); btn.disabled = true; }); }
 
 $('#btnSubmitFill').onclick = submitFill;
 $('#fillInput').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); submitFill(); }});
 $('#btnNext').onclick = ()=>{ if(state.i < state.quiz.length){ state.i++; nextQuestion(); }};
 
-function submitFill(){
-  const val = $('#fillInput').value;
-  if(!val.trim()){ alert('請輸入英文答案'); return }
-  const correct = sameWord(val, state.currentQ.answer);
-  if(correct){ $('#fillInput').style.borderColor = 'var(--ok)'; }
-  else{ $('#fillInput').style.borderColor = 'var(--bad)'; }
-  recordAnswer(correct, val);
-}
+function submitFill(){ const val=$('#fillInput').value; if(!val.trim()){ alert('請輸入英文答案'); return } const correct = sameWord(val, state.currentQ.answer); $('#fillInput').style.borderColor = correct? 'var(--ok)':'var(--bad)'; recordAnswer(correct, val); }
 
-function recordAnswer(correct, userAns){
-  if(correct) state.right++;
-  else state.wrongItems.push({ q: state.currentQ, your: userAns, ans: state.currentQ.answer });
-  // 延遲 300ms 再進下一題，讓顏色有回饋
-  setTimeout(()=>{ state.i++; nextQuestion(); }, 250);
-}
+function recordAnswer(correct, userAns){ if(correct) state.right++; else state.wrongItems.push({ q: state.currentQ, your: userAns, ans: state.currentQ.answer }); setTimeout(()=>{ state.i++; nextQuestion(); }, 250); }
 
-$('#btnHint').onclick = ()=>{
-  const first = (state.currentQ.answer||'')[0]||'';
-  $('#hintText').textContent = first ? `提示：${first}…` : '';
-};
-
-$('#btnSpeak').onclick = ()=>{
-  if(!('speechSynthesis' in window)) return;
-  const u = new SpeechSynthesisUtterance(state.currentQ.answer);
-  u.lang = 'en-US';
-  window.speechSynthesis.speak(u);
-};
+$('#btnHint').onclick = ()=>{ const first = (state.currentQ.answer||'')[0]||''; $('#hintText').textContent = first ? `提示：${first}…` : ''; };
+$('#btnSpeak').onclick = ()=>{ if(!('speechSynthesis' in window)) return; const u=new SpeechSynthesisUtterance(state.currentQ.answer); u.lang='en-US'; window.speechSynthesis.speak(u); };
 
 // 鍵盤快捷鍵
-window.addEventListener('keydown', e=>{
-  const inQuiz = !$('#quizCard').classList.contains('hide');
-  if(!inQuiz) return;
-  if(state.currentQ?.mode==='choice'){
-    if(['1','2','3','4'].includes(e.key)){
-      const i = +e.key - 1; const btn = $$('#choiceBox .choice')[i]; if(btn) btn.click();
-    }
-  }
-  if(e.key==='Enter'){
-    if(state.currentQ?.mode==='fill'){ submitFill(); }
-    else if(state.i < state.quiz.length){ state.i++; nextQuestion(); }
-  }
-});
-
-function shuffle(a){
-  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
-  return a;
-}
+window.addEventListener('keydown', e=>{ const inQuiz = !$('#quizCard').classList.contains('hide'); if(!inQuiz) return; if(state.currentQ?.mode==='choice'){ if(['1','2','3','4'].includes(e.key)){ const i=+e.key-1; const btn=$$('#choiceBox .choice')[i]; if(btn) btn.click(); }} if(e.key==='Enter'){ if(state.currentQ?.mode==='fill'){ submitFill(); } else if(state.i < state.quiz.length){ state.i++; nextQuestion(); } }});
 
 function finishQuiz(){
-  $('#quizCard').classList.add('hide');
-  $('#resultCard').classList.remove('hide');
-  const total = state.quiz.length;
-  const pct = Math.round((state.right/total)*100);
-  $('#scorePct').textContent = pct+'%';
-  $('#scoreRight').textContent = state.right; $('#scoreTotal').textContent = total;
+  $('#quizCard').classList.add('hide'); $('#resultCard').classList.remove('hide');
+  const total=state.quiz.length; const pct=Math.round((state.right/total)*100);
+  $('#scorePct').textContent = pct+'%'; $('#scoreRight').textContent = state.right; $('#scoreTotal').textContent = total;
 
-  // 錯題列表
-  const box = $('#wrongList');
-  box.innerHTML = state.wrongItems.length? '' : '<div class="muted small">太棒了！沒有錯題。</div>';
-  state.wrongItems.forEach(item=>{
-    const div = document.createElement('div');
-    div.className = 'wrong-item';
-    div.innerHTML = `<div><b>${escapeHtml(item.q.zh)}</b> <span class="pos">${escapeHtml(item.q.pos||'')}</span></div>
-                     <div class="small">正解：<b>${escapeHtml(item.ans)}</b></div>
-                     <div class="small">你的答案：<span style="color:var(--bad)">${escapeHtml(item.your)}</span></div>`;
-    box.appendChild(div);
-  });
+  const box=$('#wrongList'); box.innerHTML = state.wrongItems.length? '' : '<div class="muted small">太棒了！沒有錯題。</div>';
+  state.wrongItems.forEach(item=>{ const div=document.createElement('div'); div.className='wrong-item'; div.innerHTML = `<div><b>${escapeHtml(item.q.zh||'（無中文）')}</b> <span class="pos">${escapeHtml(item.q.pos||'')}</span></div><div class="small">正解：<b>${escapeHtml(item.ans)}</b></div><div class="small">你的答案：<span style="color:var(--bad)">${escapeHtml(item.your)}</span></div>`; box.appendChild(div); });
 
-  // 保存錯題索引（給「只練錯題」）
   state.lastWrongPool = state.wrongItems.map(w=>w.q.idx);
   $('#btnWrongPractice').disabled = state.lastWrongPool.length===0;
 
-  // 儲存成績
-  const rec = {
-    time: Date.now(),
-    score: pct,
-    mode: ({choice:'選擇', fill:'填空', mixed:'混合'})[$('#mode').value]||$('#mode').value,
-    range: $('#range').value || '全部',
-    count: total,
-  };
+  const rec = { time:Date.now(), score:pct, mode:({choice:'選擇', fill:'填空', mixed:'混合'})[$('#mode').value]||$('#mode').value, range:$('#range').value||'全部', count:total };
   saveHistory(rec);
 }
 
 $('#btnRetry').onclick = ()=> startQuiz();
-$('#btnPracticeWrong').onclick = ()=>{
-  if(!state.lastWrongPool.length){ alert('沒有錯題可練'); return }
-  startQuiz({ useWrongPool:true });
-};
-
+$('#btnPracticeWrong').onclick = ()=>{ if(!state.lastWrongPool.length){ alert('沒有錯題可練'); return } startQuiz({ useWrongPool:true }); };
 </script>
 </body>
 </html>
