@@ -61,9 +61,10 @@
         <input id="sheetUrl" placeholder="貼上已公開的 CSV 連結（檔案→共用→發布到網路，選 CSV）" />
         <div class="row" style="margin-top:8px">
           <button id="btnLoad" class="primary">載入題庫</button>
+          <button id="btnLoadDefault" class="ghost">用預設題庫</button>
           <button id="btnUseSample" class="ghost">使用範例題庫</button>
         </div>
-        <div class="hint">格式：三欄 <b>中文</b>、<b>英文</b>、<b>詞性</b>。<br>也可用 Google Visualization JSON（?gviz=1）的 URL，系統會自動解析。</div>
+        <div class="hint">格式：三欄 <b>中文</b>、<b>英文</b>、<b>詞性</b>。<br>可在原始碼上方設定「預設題庫 URL」，開啟網頁就會自動讀取；也能隨時貼上新連結覆蓋。</div>
       </div>
       <div>
         <label>出題範圍（索引）</label>
@@ -175,6 +176,12 @@
 </main>
 
 <script>
+// ←← 在這裡設定你的預設題庫網址（CSV 或 gviz JSON）
+// 例如：
+// const DEFAULT_DATA_URL = "https://docs.google.com/spreadsheets/d/1Al0fXedODCSlb_CuVGoKlf78ioj3NREHpYoE8XJHqig/gviz/tq?tqx=out:json&gid=0";
+// 如果留空字串，就不會自動載入預設題庫。
+const DEFAULT_DATA_URL = "https://docs.google.com/spreadsheets/d/1Al0fXedODCSlb_CuVGoKlf78ioj3NREHpYoE8XJHqig/gviz/tq?tqx=out:json&gid=0";
+
 // ====== 資料與工具 ======
 const $ = (sel)=>document.querySelector(sel);
 const $$ = (sel)=>Array.from(document.querySelectorAll(sel));
@@ -221,8 +228,12 @@ function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":
 const datasetStatus = $('#datasetStatus');
 const sheetUrlInput = $('#sheetUrl');
 
-$('#btnUseSample').onclick = ()=>{
-  loadSample();
+$('#btnUseSample').onclick = ()=>{ loadSample(); };
+$('#btnLoadDefault').onclick = async ()=>{
+  if(!DEFAULT_DATA_URL){ alert('尚未在程式碼中設定 DEFAULT_DATA_URL。'); return; }
+  sheetUrlInput.value = DEFAULT_DATA_URL;
+  localStorage.removeItem(DATA_CACHE_KEY); // 強制以預設為主
+  $('#btnLoad').click();
 };
 $('#btnLoad').onclick = async ()=>{
   const url = sheetUrlInput.value.trim();
@@ -279,11 +290,25 @@ function loadSample(){
   datasetStatus.innerHTML = `題庫：<b>${state.raw.length}</b> 筆（範例）`;
 }
 
-// 啟動時，若有快取 URL，嘗試讀取
+// 啟動時，若有快取 URL，或預設題庫，就嘗試讀取
 (async function initLoad(){
   renderHistory();
   const cached = localStorage.getItem(DATA_CACHE_KEY);
-  if(cached){ sheetUrlInput.value = cached; try{ if(cached.includes('gviz=1')) state.raw = await fetchGvizJson(cached); else state.raw = await fetchCsv(cached); datasetStatus.innerHTML = `題庫：<b>${state.raw.length}</b> 筆`; }catch{}}
+  try{
+    if(cached){
+      sheetUrlInput.value = cached;
+      if(cached.includes('gviz=1') || cached.includes('tqx=out:json')) state.raw = await fetchGvizJson(cached); else state.raw = await fetchCsv(cached);
+      datasetStatus.innerHTML = `題庫：<b>${state.raw.length}</b> 筆（上次使用）`;
+    } else if (DEFAULT_DATA_URL){
+      sheetUrlInput.value = DEFAULT_DATA_URL;
+      if(DEFAULT_DATA_URL.includes('gviz=1') || DEFAULT_DATA_URL.includes('tqx=out:json')) state.raw = await fetchGvizJson(DEFAULT_DATA_URL); else state.raw = await fetchCsv(DEFAULT_DATA_URL);
+      localStorage.setItem(DATA_CACHE_KEY, DEFAULT_DATA_URL);
+      datasetStatus.innerHTML = `題庫：<b>${state.raw.length}</b> 筆（預設）`;
+    }
+  }catch(e){
+    console.error(e);
+    datasetStatus.innerHTML = '題庫：<span class="muted">自動載入失敗，請手動貼上或改用範例</span>';
+  }
 })();
 
 // ====== 出題 ======
